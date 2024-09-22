@@ -1,26 +1,11 @@
-a = 5
-b = 3 + 3
-c = (4 + 7) - 1
+age = 60 + 9
+> age
+> "awesome"
+~! age
 
-d = "woi"
-e = 'hmm'
-
-##
-#variable-ast-object
-#name = 'b'
-#values = [
-#    (int, 3),
-#    (add, +),
-#    (int, 3)
-#]
-
-#name = 'c'
-#values = [
-#    (paran_s, 0),
-#    (int, 4),
-#    (add, +),
-#    (int, 7),
-#    (paran_e, 0),
-#    (sub, -)
-#    (int, 1)
-#]
+if (age > 18):
+    > "Lets have beer!"
+elif (age < 18):
+    > "Underage"
+else:
+    > "Its not going to run"
