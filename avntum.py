@@ -4,7 +4,7 @@ from core.transpile import *
 
 parse = argparse.ArgumentParser(description='avm file')
 parse.add_argument('file', type=str)
-parse.add_argument('-v', '--version', action='version', version='Version: 1.6\n\nThis version includes printing, variables assignment, arthemtic operations')
+parse.add_argument('-v', '--version', action='version', version='Version: 1.7\n\nThis version includes printing, variables assignment, arthemtic operations')
 
 args = parse.parse_args()
 file_name = args.file

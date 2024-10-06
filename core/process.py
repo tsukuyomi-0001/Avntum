@@ -85,8 +85,6 @@ class Process():
             if code == 'TERM' or line == 'TERM':
                 break
 
-        print(self.variables)
-
     def Lexer(self, line, index):
         token = []
         paran_count = 0
@@ -121,6 +119,8 @@ class Process():
             return token[0][1].upper()
         elif token[0][1] == 'return':
             return token[0][1].upper()
+        elif token[0][1] == 'try' or token[0][1] == 'catch':
+            return token[0][1].upper()
 
         elif token[0][0] == 'NAME' and token[1][0] == 'LPARAN': return 'FUNCCALL'
 
@@ -148,6 +148,8 @@ class Process():
             self.varInFunc(token[3:-2])
         elif x == 'RETURN':
             self.toIntendApplier(Return(token, x), intends)
+        elif x == 'TRY' or x == 'CATCH':
+            self.toIntendApplier(Error(x), intends)
 
     def varInFunc(self, token):
         for _ in token:

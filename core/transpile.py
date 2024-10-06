@@ -59,6 +59,11 @@ class Transpiler:
         
         if object.type == 'RETURN':
             code_string += f'return {self.convert(object.value)};\n'
+
+        if object.type == 'TRY':
+            code_string += f'{object.name}'
+        if object.type == 'CATCH':
+            code_string += f'{object.name}(...)'
         code_string+='\t'
         return code_string
 
@@ -89,7 +94,6 @@ class Transpiler:
         header = set()
         code_string = ''
         for token in value:
-            print(token[0])
             if token[0] == 'LPARAN': code_string = code_string + '(' * (token[1]+1)
             elif token[0] == 'RPARAN': code_string = code_string + ')' * (token[1]+1)
             elif token[0] == 'STRING':

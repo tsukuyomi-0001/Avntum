@@ -5,7 +5,6 @@ class VarAssign:
         self.value = token[1][:]
         self.codeblock = []
         self.initialize = initialize
-        print(self.name, self.value)
 
 class FuncCall:
     def __init__(self, token, type):
@@ -26,6 +25,12 @@ class Return():
         self.type = type
         self.name = token[0][1]
         self.value = token[1:]
+        self.codeblock = []
+
+class Error:
+    def __init__(self, type):
+        self.type = type
+        self.name = type.lower()
         self.codeblock = []
 
 class Conditions():
