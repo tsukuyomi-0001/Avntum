@@ -1,0 +1,32 @@
+#x,y = 5, "boom!"
+#z = input("so? ")
+#print()
+#print("boom!", z)
+#print(z,z+z)
+
+#if (100 > 60):
+#    if (1 < 2):
+#        print("well well well..")
+#elif (100 > 500):
+#    print("Smaller")
+#else:
+#    print("boom")
+
+#i = 0
+#while (i < 11):
+#    print(6, "x", i, "=", 6*i)
+#    i = i + 1
+
+#for i in range(10):
+#    x = 29
+
+#x = "*"
+#for i in range(4):
+#    print(x*i)
+
+#for i in range(3):
+#    for j in range(5):
+#        print(i, "x" , j, "=", i*j)
+
+func app(a):
+    return "wow"
