@@ -3,10 +3,11 @@ imports = {
     "print": ['#include "./builtins/core.c++"\n'],
     "input": ['#include <iostream>\n'],
     "STRING": ['#include <string>\n'],
-    "FUNC": ['#include <vector>\n', '#include <tuple>\n']
+    "FUNC": ['#include <vector>\n', '#include <tuple>\n'],
+    "write": ['#include "./builtins/core.c++"\n']
 }
 
-builtin_func = ['print', 'input', 'range']
+builtin_func = ['print', 'input', 'range', 'read', 'write']
 
 class Transpiler:
     def __init__(self, ast, filename, variables):
@@ -106,10 +107,13 @@ class Transpiler:
                     for h in imports['VARASSIGN']:
                         self.header.add(h)
                     code_string+= f'vector<float> {token[1]}'
-                elif token[1] in self.variables and token[1] in self.vartrack: 
-                    code_string+= f'{token[1]}'
-                elif token[1] in self.variables and not token[1] in self.vartrack: 
-                    code_string+= f'encode({token[1]})'
+                elif token[1] in self.variables:
+                    code_string += f'{token[1]}'
+                # elif token[1] in self.variables and token[1] in self.vartrack: 
+                #     code_string+= f'{token[1]}'
+                # elif token[1] in self.variables and not token[1] in self.vartrack: 
+                #     print(self.vartrack)
+                #     code_string+= f'encode({token[1]})'
                 
                 for func in builtin_func:
                     if func == token[1]:

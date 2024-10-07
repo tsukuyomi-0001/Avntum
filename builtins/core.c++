@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <stdexcept>
+#include <fstream>
 using namespace std;
 
 template<typename T>
@@ -154,4 +155,45 @@ vector<vector<float>> range(vector<float> a) {
         map[i][2] = i;
     }
     return map;
+}
+
+vector<float> read(vector<float>file){
+    ifstream inputFile(str(file));
+    if (!inputFile) {
+        std::cerr << "Unable to open file example.txt";
+        vector<float> x = {0, 1, 0};
+        return x; // Exit with error code
+    }
+
+    vector<float> dummy;
+    dummy.emplace_back(2);
+    int len = 0;
+    string line;
+
+    vector<float> chara;
+    while (getline(inputFile, line)){
+        len += line.length();
+        vector<float> temp = encode(line);
+        for (int i = 2; i<temp.size(); i++){
+            chara.emplace_back(temp[i]);
+        }
+    }
+    dummy.emplace_back(len);
+    
+    for (const auto& i : chara){
+        dummy.emplace_back(i);
+    }
+
+    inputFile.close();
+    return dummy;
+}
+
+void write(vector<float>line, vector<float>file){
+    ofstream inputFile(str(file));
+    if (!inputFile) {
+        std::cerr << "Unable to open file example.txt";
+    }
+    
+    inputFile << str(line) << endl;
+    inputFile.close();
 }
