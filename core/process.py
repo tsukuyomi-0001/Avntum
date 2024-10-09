@@ -26,7 +26,8 @@ token = {
     "SMALL": r"<",
     "BIG": r'>',
     "INDT": r":$",
-    "SEP": r","
+    "SEP": r",",
+    "CONT": r"."
 }
 
 # from - 
@@ -81,11 +82,11 @@ class Process():
         for index, line in enumerate(codelines):
             line = intendApply(line, index)
             if line == 'EMPTY': continue
-            code = self.Lexer(line, index)
+            code = self.Lexer(line)
             if code == 'TERM' or line == 'TERM':
                 break
 
-    def Lexer(self, line, index):
+    def Lexer(self, line):
         token = []
         paran_count = 0
         for match in re.finditer(types, line):
@@ -121,6 +122,8 @@ class Process():
             return token[0][1].upper()
         elif token[0][1] == 'try' or token[0][1] == 'catch':
             return token[0][1].upper()
+        elif token[0][1] == 'import':
+            return token[0][1].upper()
 
         elif token[0][0] == 'NAME' and token[1][0] == 'LPARAN': return 'FUNCCALL'
 
@@ -150,6 +153,21 @@ class Process():
             self.toIntendApplier(Return(token, x), intends)
         elif x == 'TRY' or x == 'CATCH':
             self.toIntendApplier(Error(x), intends)
+        elif x == 'IMPORT':
+            self.importProcess(token[1:])
+
+    def importProcess(self, x):
+        self.address = ''
+        for token in x:
+            print(token)
+            if token[1] == '.':
+                self.address += '/'
+            else:
+                self.address += token[1]
+        with open(self.address + '.avm') as f:
+            for line in f.readlines():
+                self.Lexer(line)
+
 
     def varInFunc(self, token):
         for _ in token:

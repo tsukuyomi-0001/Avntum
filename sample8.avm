@@ -1,0 +1,3 @@
+x = read("sample2.avm")
+print(x)
+write("wow from great Avntum >;","sample2.avm")
