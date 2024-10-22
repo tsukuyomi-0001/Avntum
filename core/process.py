@@ -1,36 +1,66 @@
 import re
-from .objects import *
+from .object import *
+from .transpile import *
+
+"""
+2) global and local
+making a variable in object named variable which stores
+variables created inside of it
+
+7) function - both static and dynamic for
+this too we will make two more list that store 
+static functions and dynamic functions
+
+for args there are two position, and placeholder
+a,b,c
+a,b, c = 3
+
+also args -> for that args x
+"""
 
 token = {
     "INTEND": r"<INTEND>",
-    "NAME": r"\b[a-zA-Z_][a-zA-Z0-9_]*\b",
-    # sorry
+    "NAME": r"\b[a-zA-Z][a-zA-Z0-9_]*\b",
+
+    "int": r"int",
+    "string": r"str",
+    "float": r"float",
+    
+    "int16": r"int16",
+    "int32": r"int32",
+    "int64": r"int64",
+
+    "float64": r"float64",
+    "float128": r"float128",
+
     "STR1": r"'[^']*'",
     "STR2": r'"[^"]*"',
-    "INT": r"\b\d+\b",
-    "LPARAN": r"[\[\(\{]",
-    "RPARAN": r"[\]\)\}]",
-    "SPACE": r"\s+",
-    "EQUAL": r"==",
-    "ASSIGN": r"=",
-    "COMMENT": r"#.*",
-    "ADD": r"\+",
-    "SUB": r"-",
-    "FLOOR": r"//",
-    "DIV": r"/",
-    "SQUR": r"\*\*",
-    "MUL": r"\*",
-    "SMALLEQ": r"<=",
-    "BIGEQ": r">=",
-    "NOTEQ": r"!=",
-    "SMALL": r"<",
+    "FLOAT": r'\b\d+\.\d+\b',
+    "INT": r'\b\d+\b',
+
+    "LPARAN": r'[\[\(\{]',
+    "RPARAN": r'[\]\)\}]',
+
+    "SPACE": r'\s+',
+    "COMMENT": r'#',
+
+    "EQUAL": r'==',
+    "ASSIGN": r'=',
+    "ADD": r'\+',
+    "SUB": r'-',
+    "DIV": r'/',
+    "MUL": r'\*',
+
+    "SMALLEQ": r'<=',
+    "BIGEQ": r'>=',
+    "NOTEQ": r'!=',
+    "SMALL": r'<',
     "BIG": r'>',
-    "INDT": r":$",
-    "SEP": r",",
-    "CONT": r"."
+    "INDT": r':$',
+    "SEP": r',',
+    'NODE': r'.',
 }
 
-# from - 
 types = '|'.join(f'(?P<{key}>{value})' for key,value in token.items())
 
 def getValue(right):
@@ -77,7 +107,9 @@ def intendApply(line, index):
 class Process():
     def __init__(self, codelines):
         self.ast = []
-        self.variables = set()
+        self.static_var = set()
+        self.dynamic_var = set()
+        self.header = set()
 
         for index, line in enumerate(codelines):
             line = intendApply(line, index)
@@ -85,6 +117,19 @@ class Process():
             code = self.Lexer(line)
             if code == 'TERM' or line == 'TERM':
                 break
+    
+    def importProcess(self, x):
+        self.address = ''
+        for token in x:
+            if token[1] == '.':
+                self.address += '/'
+            else:
+                self.address += token[1]
+        with open(self.address + '.avm') as f:
+            core = Process(f.readlines())
+            Transpiler(core.ast, self.address+'.avm', core.dynamic_var, core.static_var, set(), import_file=True)
+        
+        self.header.add(self.address)
 
     def Lexer(self, line):
         token = []
@@ -107,83 +152,74 @@ class Process():
 
         if len(token) != 0:
                 self.Parser(token)
-# to - perfect
+
     def TypeCheck(self, token):
-        if ('ASSIGN', '=') in token:
-            return 'VARASSIGN'
+        if token[0][1] == 'func':
+            return 'dynamicFunc'
+        elif ('ASSIGN', '=') in token:
+            if token[0][1] in ['int', 'float', 'string', 'int16', 'int32', 'int64', 'float64', 'float128']:
+                return 'staticVar'
+            else:
+                return 'dynamicVar'
+        if token[0][1] == 'import':
+            return 'import'
         elif token[0][1] in ['if', 'elif', 'else']:
-            if token[0][1] == 'elif': return 'ELSE IF'
-            else: return token[0][1].upper()
+            if token[0][1] == 'elif': return 'else if'
+            else: return token[0][1]
         elif token[0][1] in ['while', 'for']:
-            return token[0][1].upper()
-        elif token[0][1] == 'func':
-            return token[0][1].upper()
-        elif token[0][1] == 'return':
-            return token[0][1].upper()
-        elif token[0][1] == 'try' or token[0][1] == 'catch':
-            return token[0][1].upper()
-        elif token[0][1] == 'import':
-            return token[0][1].upper()
-
-        elif token[0][0] == 'NAME' and token[1][0] == 'LPARAN': return 'FUNCCALL'
-
+            return token[0][1]
+        elif token[0][0] == 'NAME' and token[1][0] == 'LPARAN':
+            return 'funccall'
+        elif token[0][1] == 'return': return 'return'
+        elif ('NODE', ".") in token: 
+            return 'node'
+        
     def Parser(self, token):
         intends = token.count(('INTEND', '<INTEND>'))
         for i in range(intends): token.pop(token.index(('INTEND', '<INTEND>')))
         x = self.TypeCheck(token)
 
-        if x == 'VARASSIGN':
+        if x == 'dynamicVar':
             left = getName(token[:token.index(('ASSIGN', '='))])
             right = getValue(token[token.index(('ASSIGN', '='))+1:])
             for _ in range(len(left)):
-                self.variables.add(left[_])
-                self.toIntendApplier(VarAssign([left[_], right[_]], x), intends)
-        elif x in ['IF', 'ELSE IF', 'ELSE']: self.toIntendApplier(Conditions(token, x), intends)
-        elif x in ['WHILE', 'FOR']: 
-            self.toIntendApplier(Loops(token, x), intends)
-            if x == 'FOR': 
-                self.variables.add(token[1][1])
-        elif x == 'FUNCCALL':
-            self.toIntendApplier(FuncCall(token, x), intends)
-
-        elif x == 'FUNC':
-            self.toIntendApplier(Func(token, x), intends)
-            self.varInFunc(token[3:-2])
-        elif x == 'RETURN':
-            self.toIntendApplier(Return(token, x), intends)
-        elif x == 'TRY' or x == 'CATCH':
-            self.toIntendApplier(Error(x), intends)
-        elif x == 'IMPORT':
+                self.toIntendApplier(dynamicVar([left[_], right[_]], x), intends, ('dynamic', left[_]))
+                self.dynamic_var.add(left[_])
+        elif x == 'staticVar':
+            dt = token[0][1]
+            left = getName(token[1:token.index(('ASSIGN', '='))])
+            right = getValue(token[token.index(('ASSIGN', '='))+1:])
+            for _ in range(len(left)):
+                self.toIntendApplier(staticVar(dt, [left[_], right[_]], x), intends, ('static', left[_]))
+                self.static_var.add(left[_])
+        elif x == 'import':
             self.importProcess(token[1:])
-
-    def importProcess(self, x):
-        self.address = ''
-        for token in x:
-            print(token)
-            if token[1] == '.':
-                self.address += '/'
-            else:
-                self.address += token[1]
-        with open(self.address + '.avm') as f:
-            for line in f.readlines():
-                self.Lexer(line)
-
-
-    def varInFunc(self, token):
-        for _ in token:
-            if _[0] == 'NAME': self.variables.add(_[1])
-
-    def toIntendApplier(self, object, intends):
+        elif x in ['if', 'else if', 'else']: self.toIntendApplier(Conditions(token, x), intends)
+        elif x in ['while', 'for']: self.toIntendApplier(Loops(token, x), intends)
+        elif x == 'dynamicFunc': self.toIntendApplier(dynamicFunc(token, x), intends)
+        elif x == 'funccall': self.toIntendApplier(funccall(token, x), intends)
+        elif x == 'return': self.toIntendApplier(Return(token, x), intends)
+        elif x == 'node': self.toIntendApplier(Node(token, x), intends)
+    
+    def toIntendApplier(self, object, intends, caller=(0,1)):
         if intends == 0:
             self.ast.append(object)
         elif intends == 1:
-            self.ast[-1].codeblock.append(object)
+            if caller != (0,1):
+                self.ast[-1].codeblock.append(object)
+                self.ast[-1].var[caller[0]].add(caller[1])
+            else:
+                self.ast[-1].codeblock.append(object)
         else:
-            self.recursiveLink(self.ast[-1].codeblock, object, intends)
-        
-    def recursiveLink(self, to, object, intend):
-        if intend == 1:
-            to.codeblock.append(object)
+            self.resursiveLink(self.ast[-1].codeblock, object, intends, caller)
+
+    def resursiveLink(self, to, object, intends, caller):
+        if intends == 1:
+            if caller != (0,1):
+                to.codeblock.append(object)
+                to.var[caller[0]].add(caller[1])
+            else:
+                to.codeblock.append(object)
         else:
             link = to[-1]
-            self.recursiveLink(link, object, intend-1)
+            self.resursiveLink(link, object, intends-1, caller) 

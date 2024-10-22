@@ -1,0 +1,8 @@
+func sqrt(x):
+    return x*1/2
+
+func pow(x, y):
+    z = x
+    for i in range(y):
+        z = z*x
+    return z 
