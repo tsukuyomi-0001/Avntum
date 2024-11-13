@@ -117,7 +117,7 @@ open game.avm and write
 
 ```
 import assests
-import_obj() # suppose there's a function called import_obj in assets
+assests.import_obj() # suppose there's a function called import_obj in assets
 ```
 
 <!-- if want to import all functions, var everything than do
