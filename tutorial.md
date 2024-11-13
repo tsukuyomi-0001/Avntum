@@ -54,11 +54,11 @@ print(b) # this should print out value you gave in
 ## to run script
 now how do we run avm script? just run this command in powershell or terminal
 ```
-avntum xyz.avm
+python avntum.py xyz.avm
 ```
 and boom! if should do that task you writen in avm.. if you are c++ users and want to see .c++ code use
 ```
-avntum xyz.avm -c
+python avntum.py xyz.avm -c
 ```
 
 ##  Conditions
